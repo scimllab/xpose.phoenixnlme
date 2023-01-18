@@ -41,7 +41,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
                                    wres        = NULL, #"CWRES",
                                    gg_theme    = theme_readable(),
                                    xp_theme    = theme_xp_default(),
-                                   quiet,
+                                   quiet       = NULL,
                                    skip        = NULL,
                                    ...) {
   
