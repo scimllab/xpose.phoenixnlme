@@ -37,40 +37,39 @@
 #' @export
 
 xpose_data_phoenixnlme <- function(obj         = NULL,
-                              pred        = NULL, #"CPRED",
-                              wres        = NULL, #"CWRES",
-                              gg_theme    = theme_readable(),
-                              xp_theme    = theme_xp_default(),
-                              quiet,
-                              skip        = NULL,
-                              ...) {
-
-
+                                   pred        = NULL, #"CPRED",
+                                   wres        = NULL, #"CWRES",
+                                   gg_theme    = theme_readable(),
+                                   xp_theme    = theme_xp_default(),
+                                   quiet,
+                                   skip        = NULL,
+                                   ...) {
+  
+  
   . = NULL
   ID = NULL
   RES = NULL
   DV = NULL
   PRED = NULL
   msg = NULL
-
+  
   get_wres <- function(res, dv, pred) {
     suppressWarnings(res / (sqrt(stats::cov(dv, pred))))
   }
-
+  
   if (is.null(obj)) {
     stop('Argument `obj` required.', call. = FALSE)
   }
-
-
-  if (any("PhoenixnlmeFitData" == class(obj))) {
-    #stop('This package works for legacy phoenix nlme output only.', call. = FALSE)
-  }
-
-  if (missing(quiet)) quiet <- !interactive()
-
+  
+  
+  
+  
+  #if (missing(quiet)) 
+    quiet <- !interactive()
+  
   objok <- FALSE
-
-  if (any("PhoenixnlmeFitData" == class(obj))) {
+  
+  #if (any("PhoenixnlmeFitData" == class(obj))) {
     mtype <- "FOCE"
     software <- "phoenixnlme"
     if (is.null(wres)){
@@ -98,39 +97,39 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       }
     }
     objok <- TRUE
-  } 
-
+  #} 
+  
   #if ((objok == FALSE) | ("phoenixnlme_nlme" %in% class(obj))) {
   if ((objok == FALSE)) {
     stop('Model type currently not supported by xpose.', call. = FALSE)
   }
-
+  
   #runname <- deparse(substitute(obj))
-
-  if (any("phoenixnlmeFitData" == class(obj))) {
+  
+  #if (any("PhoenixnlmeFitData" == class(obj))) {
     data <- as.data.frame(obj)
     data_a <- data %>%
       dplyr::group_by(ID)
-
+    
     data_a <- tibble::as_tibble(data_a)
-  }
-
+  #}
+  
   if(!(wres %in% names(data_a))) {
     stop(paste(wres, ' not found in phoenixnlme fit object.', sep=""), call. = FALSE)
   }
-
+  
   if(!(pred %in% names(data_a))) {
     stop(paste(pred, ' not found in phoenixnlme fit object.', sep=""), call. = FALSE)
   }
-
+  
   # check for ETAs
   # if(!any(stringr::str_detect(names(data_a), 'ETA\\d+|ET\\d+|eta.*'))) {
   #   data_a <- merge(data_a, obj$eta)
   # }
-  if(!all(names(diag(obj$omega)) %in% names(data_a))) {
-    data_a <- merge(data_a, obj$eta)
-  }
-
+  #if(!all(names(diag(obj$omega)) %in% names(data_a))) {
+    data_a <- merge(data_a, eta) #obj$eta
+  #}
+  
   data <- NULL
   data_ind <- data_a %>%
     colnames() %>%
@@ -157,24 +156,24 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
                    'cl','v','v1','v2','v3','q','q2','q3','ka','k12','k21','k','k13','k31','k23','k32','k24','k42','k34','k43',
                    'tcl','tv','tv1','tv2','tv3','tq','tq2','tq3','tka','tk12','tk21','tk','tk13','tk31','tk23','tk32','tk24','tk42','tk34','tk43') ~ 'param',
       stringr::str_detect(.$col, 'ETA\\d+|ET\\d+|eta.*') ~ 'eta'))
-
+  
   data_ind$type[is.na(data_ind$type)] <- 'na'
-
+  
   data <- list()
   data <- dplyr::tibble(problem = 1,
-                        simtab = F,
+                        simtab = list(),
                         index = list(data_ind),
                         data = list(data_a),
                         modified = F)
-
+  
   # Generate model summary
-  if ('summary' %in% skip) {
-    msg('Skipping summary generation', quiet)
+  #if ('summary' %in% skip) {
+    #msg('Skipping summary generation', quiet)
     summary <- NULL
-  } else if (software == 'phoenixnlme') {
+  #} else if (software == 'phoenixnlme') {
     #summary <- summarise_phoenixnlme_model(obj, '', software, rounding = xp_theme$rounding, runname=runname)
   }
-
+  
   # The weighted residuals are calculated by dividing the vector of each
   # individual's residuals (res_i) by the square root of the matrix of
   # covariances of that individual's data conditional on the population model:
@@ -186,9 +185,9 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   # Label themes
   attr(gg_theme, 'theme') <- as.character(substitute(gg_theme))
   attr(xp_theme, 'theme') <- as.character(substitute(xp_theme))
-
+  uif<- NULL
   # Output xpose_data
-  list(code = obj$uif, summary = summary, data = data,
+  list(code = uif, summary = summary, data = data,
        files = files, gg_theme = gg_theme, xp_theme = xp_theme,
        options = list(dir = NULL, quiet = quiet,
                       manual_import = NULL), software = 'phoenixnlme') %>%
