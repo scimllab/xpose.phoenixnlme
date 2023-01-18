@@ -159,8 +159,8 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   data_ind$type[is.na(data_ind$type)] <- 'na'
   
   data <- list()
-  data <- dplyr::tibble(problem = 1,
-                       simtab = FALSE,
+  data <- dplyr::tibble(problem = 1, 
+                        simtab = FALSE,
                         index = list(data_ind),
                         data = list(data_a),
                         modified = F)  
@@ -188,7 +188,8 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   # Output xpose_data
   list(code = uif, summary = summary, data = data,
        files = files, gg_theme = gg_theme, xp_theme = xp_theme,
-       options = list(dir = NULL, quiet = NULL,
+       options = list(dir = NULL, quiet = FALSE,
                       manual_import = NULL), software = 'phoenixnlme') %>%
     structure(class = c('xpose_data', 'uneval'))
+  test<-return(data)
 }
