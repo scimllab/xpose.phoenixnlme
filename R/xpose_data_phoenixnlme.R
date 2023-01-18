@@ -160,7 +160,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   
   data <- list()
   data <- dplyr::tibble(problem = 1,
-                        simtab = list(data_a),
+                        simtab = F,
                         index = list(data_ind),
                         data = list(data_a),
                         modified = F)
