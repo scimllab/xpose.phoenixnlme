@@ -103,7 +103,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
     stop('Model type currently not supported by xpose.', call. = FALSE)
   }
   
-  #runname <- deparse(substitute(obj))
+  runname <- "myfit" #deparse(substitute(obj))
   
   #if (any("PhoenixnlmeFitData" == class(obj))) {
     data <- as.data.frame(obj)
