@@ -64,7 +64,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   
   
   
-  #if (missing(quiet)) quiet <- !interactive()
+  if (missing(quiet)) quiet <- !interactive()
   
   #objok <- FALSE
   
