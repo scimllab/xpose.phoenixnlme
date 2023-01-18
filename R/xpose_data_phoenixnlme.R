@@ -188,7 +188,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   # Output xpose_data
   list(code = uif, summary = summary, data = data,
        files = files, gg_theme = gg_theme, xp_theme = xp_theme,
-       options = list(dir = NULL, quiet = quiet,
+       options = list(dir = NULL, quiet = NULL,
                       manual_import = NULL), software = 'phoenixnlme') %>%
     structure(class = c('xpose_data', 'uneval'))
 }
