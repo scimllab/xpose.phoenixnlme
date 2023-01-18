@@ -121,12 +121,16 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
     stop(paste(pred, ' not found in phoenixnlme fit object.', sep=""), call. = FALSE)
   }
   
+  
+  data_a <- data.frame(data_a, indata);
+  
+  
   # check for ETAs
   # if(!any(stringr::str_detect(names(data_a), 'ETA\\d+|ET\\d+|eta.*'))) {
   #   data_a <- merge(data_a, obj$eta)
   # }
   #if(!all(names(diag(obj$omega)) %in% names(data_a))) {
-    data_a <- merge(data_a, eta) #obj$eta
+    #data_a <- merge(data_a, eta) #obj$eta
   #}
   
   data <- NULL
