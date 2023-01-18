@@ -71,7 +71,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   objok <- FALSE
 
   if (any("PhoenixnlmeFitData" == class(obj))) {
-    mtype <- obj$method
+    mtype <- "FOCE"
     software <- "phoenixnlme"
     if (is.null(wres)){
       if (any(names(obj) == "CWRES")) {
@@ -79,17 +79,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       } else  if (any(names(obj) == "NPDE")){
         wres <- "NPDE"
       } else if (any(names(obj) == "RES")) {
-        wres <- "RES"
-        obj <- phoenixnlme::addCwres(obj)
-        if (any(names(obj) == "CWRES")){
-          wres <- "CWRES"
-          warning(sprintf("Added CWRES to fit (using %s%s)",
-                          crayon::blue("phoenixnlme::"), crayon::yellow("addCwres")))
-        } else {
-          warning(sprintf("Using RES; Consider adding NPDE (%s%s) to fit",
-                          crayon::blue("phoenixnlme::"), crayon::yellow("addNpde")))
-        }
-
+        wres <- "RES"             
       }
     }
     if (is.null(pred)){
@@ -108,17 +98,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       }
     }
     objok <- TRUE
-  } else if (any("phoenixnlme_nlme" == class(obj))) {
-    mtype <- obj$method
-    software <- "phoenixnlme"
-    if (mtype == "nlme"){
-      wres <- "WRES"
-      pred <- "PRED"
-    }
-    objok <- TRUE
-  }
-
-
+  } 
 
   #if ((objok == FALSE) | ("phoenixnlme_nlme" %in% class(obj))) {
   if ((objok == FALSE)) {
