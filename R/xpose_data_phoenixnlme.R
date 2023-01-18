@@ -160,10 +160,10 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   
   data <- list()
   data <- dplyr::tibble(problem = 1,
-                       
+                       simtab = F,
                         index = list(data_ind),
                         data = list(data_a),
-                        modified = F)  #simtab = F,
+                        modified = F)  
   
   # Generate model summary
   #if ('summary' %in% skip) {
