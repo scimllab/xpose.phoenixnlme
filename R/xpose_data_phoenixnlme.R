@@ -163,7 +163,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
                         simtab = FALSE,
                         index = list(data_ind),
                         data = list(data_a),
-                        modified = F)  
+                        modified = FALSE)  
   
   # Generate model summary
   #if ('summary' %in% skip) {
