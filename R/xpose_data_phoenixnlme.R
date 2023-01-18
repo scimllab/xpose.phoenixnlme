@@ -63,7 +63,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
 
 
   if (any("PhoenixnlmeFitData" == class(obj))) {
-    stop('This package works for legacy phoenixnlme only.', call. = FALSE)
+    stop('This package works for legacy phoenix nlme output only.', call. = FALSE)
   }
 
   if (missing(quiet)) quiet <- !interactive()
@@ -125,33 +125,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
     stop('Model type currently not supported by xpose.', call. = FALSE)
   }
 
-  runname <- deparse(substitute(obj))
-
-  if ("phoenixnlme_nlme" %in% class(obj)) {
-    data <- obj$call[[3]]
-
-    data$PRED  <- obj$fitted[,1]
-    data$IPRED <- obj$fitted[,2]
-    data$RES   <- obj$residuals[,1]
-    data$IRES  <- obj$residuals[,2]
-
-    pars <- as.data.frame(stats::coef(obj))
-    pars$ID <- row.names(as.data.frame(stats::coef(obj)))
-
-    etas <- as.data.frame(obj$coefficients$random$ID)
-    names(etas) <- paste("eta.", names(etas), sep="")
-    etas$ID <- row.names(as.data.frame(obj$coefficients$random$ID))
-
-    data$ID <- as.character(data$ID)
-    data <- suppressMessages(dplyr::inner_join(data, pars))
-    data <- suppressMessages(dplyr::inner_join(data, etas))
-
-    data_a <- data %>%
-      dplyr::group_by(ID) %>%
-      dplyr::mutate(WRES = get_wres(res = RES, dv = DV, pred=PRED))
-
-    data_a <- tibble::as_tibble(data_a)
-  }
+  #runname <- deparse(substitute(obj))
 
   if (any("phoenixnlmeFitData" == class(obj))) {
     data <- as.data.frame(obj)
@@ -167,20 +141,6 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
 
   if(!(pred %in% names(data_a))) {
     stop(paste(pred, ' not found in phoenixnlme fit object.', sep=""), call. = FALSE)
-  }
-
-  if (!is.null(obj$data.name) & any("phoenixnlmeFitData" == class(obj))) {
-    ## getData works for nlme/saem;  It also works if you remove the data or use phoenixnlme's read data set
-    full.dat <- suppressWarnings({phoenixnlme::phoenixnlmeData(nlme::getData(obj))})
-    names(full.dat) <- toupper(names(full.dat))
-    if (any(names(full.dat) == "EVID")){
-      full.dat <- full.dat[full.dat$EVID == 0 | full.dat$EVID == 2, !(names(full.dat) %in% names(data_a))];
-    } else if (any(names(full.dat) == "MDV")){
-      full.dat <- full.dat[full.dat$MDV == 0, !(names(full.dat) %in% names(data_a))];
-    } else {
-      full.dat <- full.dat[, !(names(full.dat) %in% names(data_a))]
-    }
-    data_a <- data.frame(data_a, full.dat);
   }
 
   # check for ETAs
@@ -232,7 +192,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
     msg('Skipping summary generation', quiet)
     summary <- NULL
   } else if (software == 'phoenixnlme') {
-    summary <- summarise_phoenixnlme_model(obj, '', software, rounding = xp_theme$rounding, runname=runname)
+    #summary <- summarise_phoenixnlme_model(obj, '', software, rounding = xp_theme$rounding, runname=runname)
   }
 
   # The weighted residuals are calculated by dividing the vector of each
@@ -241,28 +201,8 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   #
   #   WRES_i = RES_i / SQRT(COV(data_i | F_pop))
   #
-  # This means that for each WRES calculated we include covariances between data
-  # points of an individual.  If the correlations between some of these data
-  # points are negative then the resulting WRES could also be negative, while
-  # the RES could be positive.
-  #
-  # -Andy
-
   files <- NULL
-  if(mtype=="SAEM") {
-    tracedat <- tibble::as_tibble(as.data.frame(obj$par.hist))
-    names(tracedat)[grep("iter", names(tracedat))] <-
-      "ITERATION"
-
-    files <- dplyr::tibble(name = deparse(substitute(obj)),
-                           extension = 'ext',
-                           problem = 1,
-                           subprob = 0,
-                           method = 'saem',
-                           data = list(tracedat),
-                           modified = FALSE)
-  }
-
+  
   # Label themes
   attr(gg_theme, 'theme') <- as.character(substitute(gg_theme))
   attr(xp_theme, 'theme') <- as.character(substitute(xp_theme))
