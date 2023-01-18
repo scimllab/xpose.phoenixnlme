@@ -161,7 +161,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   
   data <- list()
   data <- dplyr::tibble(problem = 1,
-                        simtab = list(),
+                        simtab = list(data_a),
                         index = list(data_ind),
                         data = list(data_a),
                         modified = F)
@@ -172,7 +172,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
     summary <- NULL
   #} else if (software == 'phoenixnlme') {
     #summary <- summarise_phoenixnlme_model(obj, '', software, rounding = xp_theme$rounding, runname=runname)
-  }
+  #}
   
   # The weighted residuals are calculated by dividing the vector of each
   # individual's residuals (res_i) by the square root of the matrix of
