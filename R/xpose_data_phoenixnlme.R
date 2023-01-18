@@ -64,7 +64,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   
   
   
-  if (missing(quiet)) quiet <- !interactive()
+  #if (missing(quiet)) quiet <- !interactive()
   
   #objok <- FALSE
   
@@ -154,7 +154,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       .$col %in% c('CL','V','V1','V2','V3','Q','Q2','Q3','KA','K12','K21','K','K13','K31','K23','K32','K24','K42','K34','K43',
                    'cl','v','v1','v2','v3','q','q2','q3','ka','k12','k21','k','k13','k31','k23','k32','k24','k42','k34','k43',
                    'tcl','tv','tv1','tv2','tv3','tq','tq2','tq3','tka','tk12','tk21','tk','tk13','tk31','tk23','tk32','tk24','tk42','tk34','tk43') ~ 'param',
-      stringr::str_detect(.$col, 'ETA\\d+|ET\\d+|eta.*') ~ 'eta'))
+      stringr::str_detect(.$col, 'n+') ~ 'eta'))
   
   data_ind$type[is.na(data_ind$type)] <- 'na'
   
