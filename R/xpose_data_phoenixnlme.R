@@ -190,5 +190,4 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
        options = list(dir = NULL, quiet = FALSE,
                       manual_import = NULL), software = 'phoenixnlme') %>%
     structure(class = c('xpose_data', 'uneval'))
-  #test<-return(data)
 }
