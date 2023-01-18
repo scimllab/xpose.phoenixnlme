@@ -63,7 +63,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
 
 
   if (any("PhoenixnlmeFitData" == class(obj))) {
-    stop('This package works for legacy phoenix nlme output only.', call. = FALSE)
+    #stop('This package works for legacy phoenix nlme output only.', call. = FALSE)
   }
 
   if (missing(quiet)) quiet <- !interactive()
