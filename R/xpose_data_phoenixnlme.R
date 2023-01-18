@@ -159,8 +159,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
   data_ind$type[is.na(data_ind$type)] <- 'na'
   
   data <- list()
-  data <- dplyr::tibble(problem = 1, 
-                        simtab = FALSE,
+  data <- dplyr::tibble(problem = 1,                         
                         index = list(data_ind),
                         data = list(data_a),
                         modified = FALSE)  
