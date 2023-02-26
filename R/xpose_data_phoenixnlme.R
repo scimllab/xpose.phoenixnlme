@@ -37,41 +37,39 @@
 #' @export
 
 xpose_data_phoenixnlme <- function(obj         = NULL,
-                              pred        = NULL, #"CPRED",
-                              wres        = NULL, #"CWRES",
-                              gg_theme    = theme_readable(),
-                              xp_theme    = theme_xp_default(),
-                              quiet,
-                              skip        = NULL,
-                              ...) {
-
-
+                                   pred        = NULL, #"CPRED",
+                                   wres        = NULL, #"CWRES",
+                                   gg_theme    = theme_readable(),
+                                   xp_theme    = theme_xp_default(),
+                                   quiet       = TRUE,
+                                   skip        = NULL,
+                                   ...) {
+  
+  
   . = NULL
   ID = NULL
   RES = NULL
   DV = NULL
   PRED = NULL
   msg = NULL
-
+  
   get_wres <- function(res, dv, pred) {
     suppressWarnings(res / (sqrt(stats::cov(dv, pred))))
   }
-
+  
   if (is.null(obj)) {
     stop('Argument `obj` required.', call. = FALSE)
   }
-
-
-  if (any("PhoenixnlmeFitData" == class(obj))) {
-    stop('This package works for legacy phoenixnlme only.', call. = FALSE)
-  }
-
-  if (missing(quiet)) quiet <- !interactive()
-
-  objok <- FALSE
-
-  if (any("PhoenixnlmeFitData" == class(obj))) {
-    mtype <- obj$method
+  
+  
+  
+  
+  #if (missing(quiet)) quiet <- !interactive()
+  
+  #objok <- FALSE
+  
+  #if (any("PhoenixnlmeFitData" == class(obj))) {
+    mtype <- "FOCE"
     software <- "phoenixnlme"
     if (is.null(wres)){
       if (any(names(obj) == "CWRES")) {
@@ -79,17 +77,7 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       } else  if (any(names(obj) == "NPDE")){
         wres <- "NPDE"
       } else if (any(names(obj) == "RES")) {
-        wres <- "RES"
-        obj <- phoenixnlme::addCwres(obj)
-        if (any(names(obj) == "CWRES")){
-          wres <- "CWRES"
-          warning(sprintf("Added CWRES to fit (using %s%s)",
-                          crayon::blue("phoenixnlme::"), crayon::yellow("addCwres")))
-        } else {
-          warning(sprintf("Using RES; Consider adding NPDE (%s%s) to fit",
-                          crayon::blue("phoenixnlme::"), crayon::yellow("addNpde")))
-        }
-
+        wres <- "RES"             
       }
     }
     if (is.null(pred)){
@@ -108,89 +96,43 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       }
     }
     objok <- TRUE
-  } else if (any("phoenixnlme_nlme" == class(obj))) {
-    mtype <- obj$method
-    software <- "phoenixnlme"
-    if (mtype == "nlme"){
-      wres <- "WRES"
-      pred <- "PRED"
-    }
-    objok <- TRUE
-  }
-
-
-
+  #} 
+  
   #if ((objok == FALSE) | ("phoenixnlme_nlme" %in% class(obj))) {
   if ((objok == FALSE)) {
     stop('Model type currently not supported by xpose.', call. = FALSE)
   }
-
-  runname <- deparse(substitute(obj))
-
-  if ("phoenixnlme_nlme" %in% class(obj)) {
-    data <- obj$call[[3]]
-
-    data$PRED  <- obj$fitted[,1]
-    data$IPRED <- obj$fitted[,2]
-    data$RES   <- obj$residuals[,1]
-    data$IRES  <- obj$residuals[,2]
-
-    pars <- as.data.frame(stats::coef(obj))
-    pars$ID <- row.names(as.data.frame(stats::coef(obj)))
-
-    etas <- as.data.frame(obj$coefficients$random$ID)
-    names(etas) <- paste("eta.", names(etas), sep="")
-    etas$ID <- row.names(as.data.frame(obj$coefficients$random$ID))
-
-    data$ID <- as.character(data$ID)
-    data <- suppressMessages(dplyr::inner_join(data, pars))
-    data <- suppressMessages(dplyr::inner_join(data, etas))
-
-    data_a <- data %>%
-      dplyr::group_by(ID) %>%
-      dplyr::mutate(WRES = get_wres(res = RES, dv = DV, pred=PRED))
-
-    data_a <- tibble::as_tibble(data_a)
-  }
-
-  if (any("phoenixnlmeFitData" == class(obj))) {
+  
+  runname <- "myfit" #deparse(substitute(obj))
+  
+  #if (any("PhoenixnlmeFitData" == class(obj))) {
     data <- as.data.frame(obj)
     data_a <- data %>%
       dplyr::group_by(ID)
-
+    
     data_a <- tibble::as_tibble(data_a)
-  }
-
+  #}
+  
   if(!(wres %in% names(data_a))) {
     stop(paste(wres, ' not found in phoenixnlme fit object.', sep=""), call. = FALSE)
   }
-
+  
   if(!(pred %in% names(data_a))) {
     stop(paste(pred, ' not found in phoenixnlme fit object.', sep=""), call. = FALSE)
   }
-
-  if (!is.null(obj$data.name) & any("phoenixnlmeFitData" == class(obj))) {
-    ## getData works for nlme/saem;  It also works if you remove the data or use phoenixnlme's read data set
-    full.dat <- suppressWarnings({phoenixnlme::phoenixnlmeData(nlme::getData(obj))})
-    names(full.dat) <- toupper(names(full.dat))
-    if (any(names(full.dat) == "EVID")){
-      full.dat <- full.dat[full.dat$EVID == 0 | full.dat$EVID == 2, !(names(full.dat) %in% names(data_a))];
-    } else if (any(names(full.dat) == "MDV")){
-      full.dat <- full.dat[full.dat$MDV == 0, !(names(full.dat) %in% names(data_a))];
-    } else {
-      full.dat <- full.dat[, !(names(full.dat) %in% names(data_a))]
-    }
-    data_a <- data.frame(data_a, full.dat);
-  }
-
+  
+  
+  data_a <- data.frame(data_a, indata);
+  
+  
   # check for ETAs
   # if(!any(stringr::str_detect(names(data_a), 'ETA\\d+|ET\\d+|eta.*'))) {
   #   data_a <- merge(data_a, obj$eta)
   # }
-  if(!all(names(diag(obj$omega)) %in% names(data_a))) {
-    data_a <- merge(data_a, obj$eta)
-  }
-
+  #if(!all(names(diag(obj$omega)) %in% names(data_a))) {
+    #data_a <- merge(data_a, eta) #obj$eta
+  #}
+  
   data <- NULL
   data_ind <- data_a %>%
     colnames() %>%
@@ -216,61 +158,41 @@ xpose_data_phoenixnlme <- function(obj         = NULL,
       .$col %in% c('CL','V','V1','V2','V3','Q','Q2','Q3','KA','K12','K21','K','K13','K31','K23','K32','K24','K42','K34','K43',
                    'cl','v','v1','v2','v3','q','q2','q3','ka','k12','k21','k','k13','k31','k23','k32','k24','k42','k34','k43',
                    'tcl','tv','tv1','tv2','tv3','tq','tq2','tq3','tka','tk12','tk21','tk','tk13','tk31','tk23','tk32','tk24','tk42','tk34','tk43') ~ 'param',
-      stringr::str_detect(.$col, 'ETA\\d+|ET\\d+|eta.*') ~ 'eta'))
-
+      stringr::str_detect(.$col, 'n+') ~ 'eta'))
+  
   data_ind$type[is.na(data_ind$type)] <- 'na'
-
+  
   data <- list()
-  data <- dplyr::tibble(problem = 1,
-                        simtab = F,
+  data <- dplyr::tibble(problem = 1, 
+                        simtab = FALSE,
                         index = list(data_ind),
                         data = list(data_a),
-                        modified = F)
-
+                        modified = FALSE)  
+  
   # Generate model summary
-  if ('summary' %in% skip) {
-    msg('Skipping summary generation', quiet)
+  #if ('summary' %in% skip) {
+    #msg('Skipping summary generation', quiet)
     summary <- NULL
-  } else if (software == 'phoenixnlme') {
-    summary <- summarise_phoenixnlme_model(obj, '', software, rounding = xp_theme$rounding, runname=runname)
-  }
-
+  #} else if (software == 'phoenixnlme') {
+    #summary <- summarise_phoenixnlme_model(obj, '', software, rounding = xp_theme$rounding, runname=runname)
+  #}
+  
   # The weighted residuals are calculated by dividing the vector of each
   # individual's residuals (res_i) by the square root of the matrix of
   # covariances of that individual's data conditional on the population model:
   #
   #   WRES_i = RES_i / SQRT(COV(data_i | F_pop))
   #
-  # This means that for each WRES calculated we include covariances between data
-  # points of an individual.  If the correlations between some of these data
-  # points are negative then the resulting WRES could also be negative, while
-  # the RES could be positive.
-  #
-  # -Andy
-
   files <- NULL
-  if(mtype=="SAEM") {
-    tracedat <- tibble::as_tibble(as.data.frame(obj$par.hist))
-    names(tracedat)[grep("iter", names(tracedat))] <-
-      "ITERATION"
-
-    files <- dplyr::tibble(name = deparse(substitute(obj)),
-                           extension = 'ext',
-                           problem = 1,
-                           subprob = 0,
-                           method = 'saem',
-                           data = list(tracedat),
-                           modified = FALSE)
-  }
-
+  
   # Label themes
   attr(gg_theme, 'theme') <- as.character(substitute(gg_theme))
   attr(xp_theme, 'theme') <- as.character(substitute(xp_theme))
-
+  uif<- NULL
   # Output xpose_data
-  list(code = obj$uif, summary = summary, data = data,
+  list(code = uif, summary = summary, data = data,
        files = files, gg_theme = gg_theme, xp_theme = xp_theme,
-       options = list(dir = NULL, quiet = quiet,
+       options = list(dir = NULL, quiet = FALSE,
                       manual_import = NULL), software = 'phoenixnlme') %>%
     structure(class = c('xpose_data', 'uneval'))
 }
